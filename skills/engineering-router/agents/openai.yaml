@@ -1,0 +1,6 @@
+interface:
+  display_name: "Engineering Router Team Mode"
+  short_description: "Route engineering work across bounded Codex-native roles"
+  default_prompt: "Use $engineering-router Team Mode to route this engineering task while preserving explicit instructions, handoffs, safety boundaries, and independent review."
+policy:
+  allow_implicit_invocation: true

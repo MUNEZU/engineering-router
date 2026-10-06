@@ -1,0 +1,6 @@
+# Machine-specific policy and external-provider overlays are intentionally local.
+/local-overlay/
+
+# Generated Python artifacts.
+__pycache__/
+*.py[cod]
