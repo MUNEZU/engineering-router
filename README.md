@@ -1,25 +1,44 @@
 # 🐈 Engineering Router
 
+<p align="center">
+  <img src="./assets/readme/hero.svg" width="100%" alt="Engineering Router：主线程负责决策与验收，按需委派调查、实现、咨询和审查；这是路由示意，不是运行记录。">
+</p>
+
 为 Codex 软件工程任务提供明确的分工、模型路由和独立审查规则。
 
-Engineering Router 把一个主线程与六种专职角色组合成小队：主线程负责决策和交付，子 agent 只处理边界清晰的调查、实现、咨询或审查。简单任务可以不委派；复杂任务按风险选择角色，不以“开更多 agent”为目标。
+主线程掌握决策和交付，六种专职角色承担有界工作。简单任务不必开小队，复杂任务按风险选择角色，而不是一律启动更多 agent。
 
-这是一个 **Codex Skill + 自定义 agent 配置**，不是独立调度服务，也不需要 AI Control Plane。当前版本为 **2.2.0**；版本变化见 [CHANGELOG](CHANGELOG.md)。
+[安装](#安装) · [使用示例](#使用) · [分工与模型](#分工与模型) · [诊断与用量](#诊断与用量) · [版本记录](CHANGELOG.md)
 
-从这里开始：[安装](#安装) → [首次使用](#使用) → [确认路由](#诊断与用量)。
+> 使用前须知：只读角色可能继承主线程的写权限。本项目不提供独立的沙箱隔离保证；权限不匹配时应停止该路由。详见[权限与适用边界](#权限与适用边界)。
 
-> 当前存在运行时权限限制：配置为只读的子 agent 可能继承主线程的写权限。使用前请阅读[权限与适用边界](#权限与适用边界)；本项目不提供独立的沙箱隔离保证。
+## 使用
 
-## 目录
+安装后，在新 Codex chat 中给出目标和边界，例如：
 
-- [安装](#安装)
-- [使用](#使用)
-- [分工与模型](#分工与模型)
-- [诊断与用量](#诊断与用量)
-- [权限与适用边界](#权限与适用边界)
-- [更新与回退](#更新与回退)
-- [开发与贡献](#开发与贡献)
-- [来源与许可](#来源与许可)
+```text
+$engineering-router
+修复这个模块的重复提交问题，保持现有 API 不变并补回归测试。
+先调查影响范围；涉及并发或数据一致性时，走高风险实现与独立审查。
+```
+
+首次激活会输出 `🐈 已开启小队模式。`；英文为 `🐈 Team Mode activated.`，同一轮只出现一次。
+
+### 小队如何工作
+
+- **按需委派**：简单工作留在主线程，一个有界问题默认一个子 agent；自主并发通常最多两个。
+- **明确边界**：每个子 agent 接收目标、非目标、修改范围和验收条件；并行工作不分配重叠写入。
+- **主线程验收**：主线程整合结果并决定是否交付；高风险变更默认需要新上下文中的独立审查。
+
+你可以要求“不使用子 agent”、指定模型或限制范围。用户要求、项目规则和有效交接优先于默认路由，委派不能扩大授权。激活提示只表明 Skill 被加载，不能证明模型或权限已正确生效。
+
+这是 **Codex Skill + 六个自定义 agent 配置**，不是独立调度服务，不需要 AI Control Plane。当前版本：**2.2.0**。
+
+### 按需使用的工作流程
+
+[代码库探索](skills/engineering-router/references/explore.md) · [稳定变更后的简化](skills/engineering-router/references/simplify.md) · [交互测试](skills/engineering-router/references/interactive-testing.md)
+
+这些是按需使用的工作规则，不是每个任务都必须执行的流水线。
 
 ## 安装
 
@@ -64,59 +83,31 @@ python3 -m unittest discover -s tests -v
 
 保存输出的备份路径。安装后重启 Codex 或打开新 chat，让客户端重新发现 Skill 和角色配置；安装完成不等于运行时验证通过。
 
-主线程模型仍由你在客户端设置，推荐 `gpt-6.1-sol` / `medium`。公开包不包含机器专用的 `local-overlay/`，也不会自动修改个人工作协议。
-
-## 使用
-
-在新的 Codex chat 中明确调用 Skill，并描述目标、范围和验收条件。例如：
-
-```text
-$engineering-router
-检查登录失败的原因。先只读调查，给出证据和影响范围，不修改代码。
-```
-
-```text
-$engineering-router
-修复这个模块的重复提交问题。保持现有 API 不变，补回归测试；
-如果涉及并发或数据一致性，按高风险路径实现并做独立审查。
-```
-
-每一轮首次激活时，Skill 会输出一次：
-
-```text
-🐈 已开启小队模式。
-```
-
-英语对应 `🐈 Team Mode activated.`；同一轮的路由调整不会重复输出。激活提示说明 Skill 已被加载，不证明子 agent 已启动或模型、权限已正确生效。
-
-你可以明确要求“不使用子 agent”、指定模型或限制修改范围。这些要求以及项目规则优先于默认路由；用户授权范围不会因委派而扩大。
-
-常用流程还包括[代码库探索](skills/engineering-router/references/explore.md)、[稳定变更后的简化](skills/engineering-router/references/simplify.md)和[交互测试](skills/engineering-router/references/interactive-testing.md)。它们是按需使用的工作规则，不是每个任务都必须执行的流水线。
+公开包不包含机器专用的 `local-overlay/`，也不会自动修改个人工作协议。
 
 ## 分工与模型
 
-主线程负责拆解、未决问题、权限、整合与最终验收。子 agent 接收明确的目标、非目标、允许范围和检查要求，而不是重新规划整个项目。
+推荐主线程使用 `gpt-6.1-sol` / `medium`，由你在客户端设置。主线程负责拆解、未决问题、权限、整合与最终验收；本包不修改它的模型配置。
 
-| 角色 | 默认模型 | 推理强度 | 配置权限¹ | 适用工作 |
-| --- | --- | --- | --- | --- |
-| `code_explorer` | `gpt-5.6-luna` | medium | read-only | 入口、调用链、根因和影响范围调查 |
-| `code_writer` | `gpt-5.6-luna` | medium | workspace-write | 清晰、局部、低风险修改 |
-| `luna_worker` | `gpt-5.6-luna` | max | workspace-write | 不跨受保护边界的较深实现 |
-| `hard_code_writer` | `gpt-6.1-sol` | high | workspace-write | 高风险、跨模块、架构或契约敏感实现 |
-| `independent_reviewer` | `gpt-6.1-sol` | high | read-only | 新上下文中的独立审查 |
-| `expert_advisor` | 调度时明确指定 | 调度时明确指定 | read-only | 需要独立判断的复杂咨询 |
+| 角色 | 模型 / 推理强度 | 工作范围 |
+| --- | --- | --- |
+| `code_explorer` | `gpt-5.6-luna` / medium | 只读调查入口、调用链、根因和影响范围 |
+| `code_writer` | `gpt-5.6-luna` / medium | 清晰、局部、低风险修改 |
+| `luna_worker` | `gpt-5.6-luna` / max | 不跨受保护边界的较深实现 |
+| `hard_code_writer` | `gpt-6.1-sol` / high | 高风险、跨模块、架构或契约敏感实现 |
+| `independent_reviewer` | `gpt-6.1-sol` / high | 新上下文中的只读独立审查 |
+| `expert_advisor` | 调度时明确指定 | 只读复杂咨询，不承担实现 |
 
-¹ 这是文件中的预期配置，不是运行时权限保证，见[权限与适用边界](#权限与适用边界)。
+调查、审查、咨询配置为 `read-only`；三个实现角色配置为 `workspace-write`。这是预期配置，**不是运行时权限保证**。
 
-`expert_advisor` 不固定模型和推理强度：通常请求 `gpt-6.1-sol` / `high`；额外用量得到明确授权后，才使用 `max`。`gpt-6-astra` 通常以 `medium` 用于关键咨询或单独审查，但必须由用户或有效交接明确选择，不能因任务重要就自动启用。
+`expert_advisor` 不固定模型或推理强度，通常请求 `gpt-6.1-sol` / `high`；额外用量得到明确授权后才使用 `max`。`gpt-6-astra` 通常以 `medium` 用于关键咨询或单独审查，必须由用户或有效交接明确选择，不自动启用。
 
-默认路由遵循以下规则：
+### 不可静默越过的边界
 
-- 简单工作可使用零个子 agent；一个有界问题默认一个子 agent。自主并发通常最多两个，必要的设计或独立审查覆盖可以例外。
-- 新子 agent 不继承历史对话；只在原任务的直接续作中复用。独立审查始终使用新 reviewer。
-- 子 agent 被要求不创建后代、不彼此直接通信；并行写入必须分配互不重叠的文件或范围。这些是工作协议，不是额外的系统级隔离机制。
-- 涉及授权、安全、迁移、支付、数据完整性、不可逆操作或公开契约的实现，不交给 `luna_worker`，应走高风险实现与独立审查路径。
-- 不默认使用 `gpt-6-sol` 或 `gpt-6-luna`，不因失败或额度压力静默更换模型。外部厂商必须被明确选择；本包不提供外部 CLI 执行器。
+- 授权、安全、迁移、支付、数据完整性、不可逆操作或公开契约变更，不交给 `luna_worker`，应走高风险实现和独立审查路径。
+- 新子 agent 不继承历史对话，只在原任务的直接续作中复用；独立 reviewer 始终新建。必要的设计或审查覆盖可以超出通常的两子 agent 并发上限。
+- 子 agent 被要求不创建后代、不彼此直接通信。这是工作协议，不是额外的系统级隔离机制。
+- 不默认使用 `gpt-6-sol` 或 `gpt-6-luna`，不因失败或额度压力静默换模型。外部厂商必须被明确选择，本包不提供外部 CLI 执行器。
 
 完整契约见 [Skill](skills/engineering-router/SKILL.md) 和[角色与路由说明](skills/engineering-router/references/profiles-routing.md)。
 
@@ -131,50 +122,51 @@ python3 skills/engineering-router/scripts/current_model.py
 # 按模型、角色和会话汇总本地保留用量
 python3 skills/engineering-router/scripts/usage_by_model.py --all --by-agent --by-session
 
-# 汇总指定主任务及其子 agent，输出 JSON
+# 指定主任务及其子 agent，输出 JSON；替换 YOUR_THREAD_ID
 python3 skills/engineering-router/scripts/usage_by_model.py --task-id YOUR_THREAD_ID --by-agent --by-session --json
 ```
 
-将 `YOUR_THREAD_ID` 替换为实际任务 ID。在设置了 `CODEX_THREAD_ID` 的 Codex 执行环境中，也可以使用 `--task-id current`；普通终端未必具备这个变量。
+设置了 `CODEX_THREAD_ID` 的 Codex 执行环境也可使用 `--task-id current`；普通终端未必具备这个变量。脚本默认读取本地活动会话，归档只通过 `--archived-sessions-root <path>` 明确纳入。
 
-脚本默认读取本地活动会话；归档仅通过 `--archived-sessions-root <path>` 明确纳入。`--days 7` 筛选的是最近七个本地自然日**创建的会话**并汇总其保留用量，不是严格按事件时间统计的“最近一周账单”。
+两点口径需要区分：
 
-结果是本地 token 观测和带日期的 Standard credits 估算。缺失、临时或未保留的记录可能使结果不完整；它不能据此精确换算 Plus 额度，也不能证明混合服务档位的实际计费。账号额度、重置时间和剩余用量以产品的账号用量视图为准。
+- `--days 7` 筛选最近七个本地自然日**创建的会话**并汇总其保留用量，不是严格按事件时间统计的近七天账单。
+- token 是本地观测，Standard credits 是带日期的估算。缺失或临时记录会影响完整性；不能据此精确换算 Plus 额度或混合服务档位计费。额度、重置时间和剩余用量以产品的账号用量视图为准。
 
-判断是否正常工作时，不只看激活提示：还应从实际 trace 核对角色、模型、推理强度、有效权限、父子关系和层级，并检查产出与验收结果。详见[评估指南](skills/engineering-router/references/evaluation.md)。
+验证路由时，还应从实际 trace 核对角色、模型、推理强度、有效权限、父子关系和层级，再检查产出与验收结果。详见[评估指南](skills/engineering-router/references/evaluation.md)。
 
 ## 权限与适用边界
 
-**已知限制：只读配置可能被父线程的运行时权限覆盖。** 2026-10-04 的桌面实测在新 chat 中也观察到了这一行为。当前模型更新没有修复它；如果有效权限与角色要求不一致，应停止该路由并报告，不能把提示词中的“只读”视作强制隔离。
+**已知限制：只读配置可能被父线程的运行时权限覆盖。** 2026-10-04 的桌面实测在新 chat 中也观察到了这一行为。当前模型更新没有修复它；有效权限不符合角色要求时，应停止并报告，不能把提示词中的“只读”当作强制隔离。
 
-自定义角色可用性、模型访问和配置应用取决于客户端。TOML 文件、spawn 请求或子 agent 自述都不是执行证据；无法确认精确组合时，不应声称路由已经通过验证。
+客户端能否应用精确的角色、模型、推理强度和权限组合，必须在运行时确认。TOML 文件、spawn 请求或子 agent 自述都不是执行证据；无法确认时，不应声称验证通过。
 
-本包不安装 `default.toml` 哨兵，不主动请求 Fast 服务档位，也不保证父线程的运行时覆盖不会影响实际服务档位。并行与低成本角色旨在限制不必要的委派，**不保证节省固定比例的额度**。
+本包不安装 `default.toml` 哨兵，不主动请求 Fast 服务档位，也不保证父线程覆盖不会影响实际档位。限制并发与选择低成本角色**不保证节省固定比例的额度**。
 
-诊断脚本不上传数据，但输出可能包含任务 ID、路径、角色和用量元数据。提交 issue 前请脱敏；不要公开原始 trace、提示词、凭据、私有源码或个人数据。
+诊断脚本不上传数据，但输出可能含任务 ID、路径、角色和用量元数据。提交 issue 前请脱敏，不要公开原始 trace、提示词、凭据、私有源码或个人数据。
 
 ## 更新与回退
 
-更新前结束活动任务，在可信 checkout 中获取新版本，再执行安装段的测试、备份和复制步骤。只替换本 Skill 和六个同名角色文件；不要覆盖其他 agent 或个人规则。跨版本变化先查阅 [CHANGELOG](CHANGELOG.md)。
+更新前结束活动任务，在可信 checkout 中获取新版本，再执行[安装](#安装)中的测试、备份和复制步骤。只替换本 Skill 和六个同名角色，不覆盖其他 agent 或个人规则。跨版本变化先看 [CHANGELOG](CHANGELOG.md)。
 
-回退时，从保存的备份恢复原 Skill 目录和同名角色文件；只移除失败安装新增、且备份中原本不存在的本包文件。不要批量清理 `agents/` 或恢复整个 Codex 配置目录。
+回退时恢复备份中的 Skill 目录和同名角色；只移除失败安装新增、且备份中原本不存在的本包文件。不要批量清理 `agents/` 或恢复整个 Codex 配置目录。
 
-更新或回退后都需要重新加载配置，并通过一个有界任务核对实际路由。静态测试通过不代表客户端权限隔离已生效。
+更新和回退后都需重新加载配置，通过一个有界任务核对实际路由。静态测试通过不代表权限隔离已生效。
 
 ## 开发与贡献
 
-仓库中的 `skills/engineering-router/` 是 Skill 与按需参考资料，`agents/` 是六种角色配置，`tests/` 覆盖路由契约、配置和诊断脚本。使用以下命令运行测试：
+`skills/engineering-router/` 包含 Skill、参考资料与诊断脚本；`agents/` 包含六个角色；`tests/` 覆盖路由契约、配置和诊断行为。
 
 ```bash
 python3 -m unittest discover -s tests -v
 ```
 
-公开 checkout 不含机器专用 overlay，相应的本地测试会跳过。这不影响公开包测试，但也不能替代真实客户端中的路由验证。
+公开 checkout 不含机器专用 overlay，相应的本地测试会跳过。测试不能替代真实客户端路由验证。
 
-欢迎通过 [Issues](https://github.com/MUNEZU/engineering-router/issues) 反馈问题，或提交 PR。报告路由问题时，请提供客户端版本、预期与实际角色/模型/权限以及脱敏后的最小复现；修改角色或规则时，请同步更新文档和测试。维护者：[MUNEZU](https://github.com/MUNEZU)。
+欢迎提交 [Issue](https://github.com/MUNEZU/engineering-router/issues) 或 PR。请提供客户端版本、预期与实际角色/模型/权限，以及脱敏后的最小复现；修改规则时同步更新文档和测试。维护者：[MUNEZU](https://github.com/MUNEZU)。
 
 ## 来源与许可
 
-本项目基于 [oil-oil/codex-team-mode](https://github.com/oil-oil/codex-team-mode) 的架构、工作流程和部分诊断内容进行适配，保留上游署名；不是官方 Codex 产品，也不声称与上游完全兼容。
+本项目基于 [oil-oil/codex-team-mode](https://github.com/oil-oil/codex-team-mode) 的架构、工作流程和部分诊断内容适配，保留上游署名；不是官方 Codex 产品，不声称与上游完全兼容。
 
 以 [MIT License](LICENSE) 发布。上游版权声明与适配说明见 [NOTICE.md](NOTICE.md)。

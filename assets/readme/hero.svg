@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420" role="img" aria-labelledby="title desc">
+  <title id="title">Engineering Router — Codex Team Mode</title>
+  <desc id="desc">主线程负责决策、整合与验收，按需委派调查、实现、咨询和审查。图为工作协议示意，不是运行记录或沙箱隔离保证。</desc>
+  <rect width="1200" height="420" rx="20" fill="#F5F7F3"/>
+  <g id="identity" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif">
+    <g id="cat-mark" transform="translate(64 40)" fill="none" stroke="#26745A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2 20V2l11 9a22 22 0 0 1 16 0L40 2v18c0 12-7 18-19 18S2 32 2 20Z"/>
+      <path d="M13 22h1m13 0h1M18 29l3 2 3-2"/>
+    </g>
+    <text x="122" y="69" fill="#53665D" font-size="24" font-weight="600" letter-spacing="2">CODEX / TEAM MODE</text>
+    <text x="60" y="174" fill="#172C24" font-size="80" font-weight="700" letter-spacing="-3">Engineering</text>
+    <text x="60" y="270" fill="#172C24" font-size="96" font-weight="700" letter-spacing="-3">Router</text>
+    <text x="64" y="335" fill="#53665D" font-size="30">主线程决策，专职角色协作。</text>
+  </g>
+  <g id="routing-map" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif">
+    <g id="root">
+      <rect x="822" y="44" width="192" height="72" rx="12" fill="#172C24"/>
+      <text x="918" y="94" text-anchor="middle" fill="#FFFFFF" font-size="44" font-weight="600">主线程</text>
+    </g>
+    <g id="optional-routes" fill="none" stroke="#91A99B" stroke-width="2.5">
+      <path d="M918 116V303M918 187H776M918 187H1060M918 303H776M918 303H1060"/>
+    </g>
+    <g id="specialists" fill="#F5F7F3" stroke="#91A99B" stroke-width="2">
+      <rect x="696" y="154" width="160" height="66" rx="10"/>
+      <rect x="980" y="154" width="160" height="66" rx="10"/>
+      <rect x="696" y="270" width="160" height="66" rx="10"/>
+      <rect x="980" y="270" width="160" height="66" rx="10"/>
+    </g>
+    <g id="route-labels" fill="#172C24" font-size="48" font-weight="600" text-anchor="middle">
+      <text x="776" y="203">调查</text>
+      <text x="1060" y="203">实现</text>
+      <text x="776" y="319">咨询</text>
+      <text x="1060" y="319">审查</text>
+    </g>
+    <circle cx="918" cy="187" r="5" fill="#26745A"/>
+    <circle cx="918" cy="303" r="5" fill="#26745A"/>
+    <text x="918" y="384" text-anchor="middle" fill="#53665D" font-size="22">按需委派 · 路由示意，非运行记录</text>
+  </g>
+</svg>
